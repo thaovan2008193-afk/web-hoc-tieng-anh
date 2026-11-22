@@ -272,6 +272,12 @@
             <span>🔔</span>
             <span>Cần ôn: <span id="header-due-count">0</span></span>
           </button>
+
+          <!-- Nút Cổng Tài Khoản / Đăng Nhập -->
+          <button id="header-auth-btn" type="button" onclick="openAuthModal()" class="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-astral-700 to-indigo-700 hover:opacity-95 border border-starlight-cyan/50 text-xs font-bold text-starlight-ivory flex items-center gap-1.5 cursor-pointer transition shadow-sm">
+            <span id="header-user-avatar">🧙‍♂️</span>
+            <span id="header-user-label">Đăng nhập</span>
+          </button>
         </div>
       </div>
 
@@ -1028,7 +1034,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <!-- Hồ sơ & Mục tiêu học tập -->
           <div class="storybook-parchment rounded-3xl p-5 space-y-4">
-            <h3 class="font-serif text-lg font-bold text-midnight-950">🧙 Hồ Sơ & Mục Tiêu Học Tập</h3>
+            <div class="flex items-center justify-between">
+              <h3 class="font-serif text-lg font-bold text-midnight-950">🧙 Hồ Sơ & Mục Tiêu Học Tập</h3>
+              <span id="workshop-account-badge" class="px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-900 text-[11px] font-bold">Chế độ Khách</span>
+            </div>
             <div class="space-y-3 text-xs sm:text-sm">
               <div>
                 <label class="block font-bold text-midnight-900 mb-1">Tên Nhà Thám Hiểm (Hiển thị trên Bảng Xếp Hạng)</label>
@@ -1044,9 +1053,14 @@
                   <input id="set-reminder-time" type="time" value="20:00" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-bold focus:outline-none" />
                 </div>
               </div>
-              <button type="button" onclick="saveWorkshopSettings()" class="w-full py-2.5 rounded-xl bg-astral-800 hover:bg-astral-900 text-white font-bold shadow-sm cursor-pointer">
-                💾 Lưu cài đặt hồ sơ
-              </button>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="saveWorkshopSettings()" class="flex-1 py-2.5 rounded-xl bg-astral-800 hover:bg-astral-900 text-white font-bold shadow-sm cursor-pointer">
+                  💾 Lưu cài đặt hồ sơ
+                </button>
+                <button id="workshop-auth-action-btn" type="button" onclick="openAuthModal()" class="px-4 py-2.5 rounded-xl bg-starlight-cyan hover:bg-cyan-300 text-midnight-950 font-extrabold cursor-pointer">
+                  🔑 Đăng nhập / Đổi tài khoản
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1355,9 +1369,106 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
     </div>
   </div>
 
+  <!-- ==================== MODAL 5: CỔNG ĐĂNG NHẬP & ĐĂNG KÝ NHÀ THÁM HIỂM ==================== -->
+  <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-midnight-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="astral-card rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 border border-starlight-cyan/45 shadow-2xl relative overflow-hidden">
+      <div class="flex items-start justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-bold text-starlight-cyan uppercase tracking-wider">🌌 Cổng Sao Định Danh</span>
+          <h3 class="font-fairy text-xl sm:text-2xl font-bold text-white mt-0.5">Hồ Sơ Nhà Thám Hiểm</h3>
+        </div>
+        <button type="button" onclick="closeAuthModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-rose-500/40 font-bold text-white cursor-pointer">✕</button>
+      </div>
+
+      <!-- Khung hiển thị khi ĐÃ ĐĂNG NHẬP -->
+      <div id="auth-logged-in-view" class="hidden space-y-4">
+        <div class="p-4 rounded-2xl bg-midnight-950/80 border border-starlight-cyan/35 flex items-center gap-3.5">
+          <div id="auth-profile-avatar" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-astral-700 to-cyan-600 flex items-center justify-center text-3xl border border-starlight-cyan/50 shadow">🧙‍♂️</div>
+          <div class="min-w-0">
+            <p id="auth-profile-name" class="font-serif text-lg font-bold text-white truncate">Starlight Explorer</p>
+            <p id="auth-profile-email" class="text-xs text-starlight-cyan truncate">explorer@leximeadow.world</p>
+            <p class="text-[11px] text-astral-200 mt-0.5">Tiến độ từ vựng, EXP & thời gian học đang được lưu riêng cho tài khoản này.</p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <button type="button" onclick="closeAuthModal()" class="flex-1 py-2.5 rounded-xl bg-starlight-cyan text-midnight-950 text-xs sm:text-sm font-extrabold cursor-pointer">
+            ✨ Tiếp tục khám phá
+          </button>
+          <button type="button" onclick="logoutExplorerAccount()" class="px-4 py-2.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 border border-rose-400/40 text-rose-200 text-xs sm:text-sm font-bold cursor-pointer">
+            🚪 Đăng xuất
+          </button>
+        </div>
+      </div>
+
+      <!-- Khung hiển thị khi CHƯA ĐĂNG NHẬP (Tab Đăng nhập / Đăng ký) -->
+      <div id="auth-guest-view" class="space-y-4">
+        <div class="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-midnight-950/80 border border-astral-400/30 text-xs font-bold">
+          <button type="button" id="auth-tab-login" onclick="switchAuthMode('login')" class="py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-400 text-midnight-950 cursor-pointer">
+            🔑 Đăng Nhập
+          </button>
+          <button type="button" id="auth-tab-register" onclick="switchAuthMode('register')" class="py-2 rounded-xl text-astral-200 hover:text-white cursor-pointer">
+            ✨ Đăng Ký Mới
+          </button>
+        </div>
+
+        <!-- Form Đăng Nhập -->
+        <form id="auth-login-form" onsubmit="handleExplorerLogin(event)" class="space-y-3 text-xs sm:text-sm">
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Email hoặc Tên đăng nhập *</label>
+            <input id="login-identifier" type="text" required placeholder="VD: explorer@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Mật khẩu *</label>
+            <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-starlight-cyan via-sky-400 to-indigo-400 text-midnight-950 font-extrabold shadow-lg glow-cyan cursor-pointer">
+            🚀 Bước Vào Thế Giới Từ Vựng
+          </button>
+        </form>
+
+        <!-- Form Đăng Ký -->
+        <form id="auth-register-form" onsubmit="handleExplorerRegister(event)" class="hidden space-y-3 text-xs sm:text-sm">
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Chọn Tinh Linh Đại Diện</label>
+            <div class="grid grid-cols-5 gap-2">
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧙‍♂️" checked class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-cyan peer-checked:text-midnight-950 text-xl border border-white/15">🧙‍♂️</span></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧚" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-pink peer-checked:text-midnight-950 text-xl border border-white/15">🧚</span></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧝‍♀️" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-yellow peer-checked:text-midnight-950 text-xl border border-white/15">🧝‍♀️</span></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🦊" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-cyan peer-checked:text-midnight-950 text-xl border border-white/15">🦊</span></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🦉" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-pink peer-checked:text-midnight-950 text-xl border border-white/15">🦉</span></label>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Tên Nhà Thám Hiểm *</label>
+            <input id="reg-name" type="text" required placeholder="VD: Lyra Moonwalker" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Email *</label>
+            <input id="reg-email" type="email" required placeholder="VD: lyra@leximeadow.world" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Mật khẩu (tối thiểu 4 ký tự) *</label>
+            <input id="reg-password" type="password" minlength="4" required placeholder="Tạo mật khẩu..." class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-starlight-pink via-purple-400 to-indigo-400 text-midnight-950 font-extrabold shadow-lg glow-pink cursor-pointer">
+            🌟 Khởi Tạo Tài Khoản & Bắt Đầu Học
+          </button>
+        </form>
+
+        <div class="pt-2 border-t border-astral-400/20 text-center">
+          <button type="button" onclick="closeAuthModal()" class="text-xs text-astral-200 hover:text-starlight-cyan underline cursor-pointer">
+            Tiếp tục trải nghiệm nhanh với tư cách Khách
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== JAVASCRIPT LOGIC HOÀN CHỈNH ==================== -->
   <script>
     const STORAGE_KEY = 'leximeadow_data_v4';
+    const ACCOUNTS_KEY = 'leximeadow_accounts_v1';
+    const CURRENT_USER_KEY = 'leximeadow_current_user_v1';
 
     // Bộ từ vựng tinh tuyển (Destination B1 + Destination B2 + 4000 Essential English Words)
     const INITIAL_WORDS = [
@@ -1980,6 +2091,8 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
     // Trạng thái toàn cục ứng dụng
     let appState = {
       playerName: 'Starlight Explorer',
+      playerAvatar: '🧙‍♂️',
+      playerEmail: '',
       dailyGoal: 15,
       reminderTime: '20:00',
       words: [],
@@ -1997,6 +2110,7 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       scenery: 'dreamscape',
       customBgData: ''
     };
+    let currentAccountEmail = null;
 
     // Điều hướng thư mục trong Word Forest (Bấm thư mục -> mở thư mục con hoặc từ vựng)
     let currentForestFolderId = null; // null = đang ở cấp Thư mục gốc
@@ -2176,14 +2290,20 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       return `${hrs}g${remMins}p`;
     }
 
+    function getActiveStorageKey() {
+      return currentAccountEmail ? `${STORAGE_KEY}_${currentAccountEmail.toLowerCase()}` : STORAGE_KEY;
+    }
+
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        currentAccountEmail = localStorage.getItem(CURRENT_USER_KEY) || null;
+        const raw = localStorage.getItem(getActiveStorageKey());
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && Array.isArray(parsed.words) && parsed.words.length > 0) {
             appState = { ...appState, ...parsed };
             ensureFoldersAndWordMapping();
+            updateAuthUiState();
             return;
           }
         }
@@ -2193,16 +2313,201 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       appState.words = JSON.parse(JSON.stringify(INITIAL_WORDS));
       appState.folders = JSON.parse(JSON.stringify(DEFAULT_FOLDERS));
       ensureFoldersAndWordMapping();
+      updateAuthUiState();
       saveState();
     }
 
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        localStorage.setItem(getActiveStorageKey(), JSON.stringify(appState));
       } catch (e) {
         console.warn('Không thể lưu vào localStorage:', e);
       }
       updateHeaderBadges();
+    }
+
+    // ==================== HỆ THỐNG ĐĂNG NHẬP & ĐĂNG KÝ TÀI KHOẢN ====================
+    function getStoredAccounts() {
+      try {
+        return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveStoredAccounts(accounts) {
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    }
+
+    function updateAuthUiState() {
+      const avatarEl = document.getElementById('header-user-avatar');
+      const labelEl = document.getElementById('header-user-label');
+      const wsBadge = document.getElementById('workshop-account-badge');
+      const wsBtn = document.getElementById('workshop-auth-action-btn');
+
+      if (currentAccountEmail) {
+        if (avatarEl) avatarEl.textContent = appState.playerAvatar || '🧙‍♂️';
+        if (labelEl) labelEl.textContent = appState.playerName || 'Tài khoản';
+        if (wsBadge) wsBadge.textContent = `✅ Đã đăng nhập (${currentAccountEmail})`;
+        if (wsBtn) wsBtn.textContent = '👤 Quản lý / Đăng xuất';
+      } else {
+        if (avatarEl) avatarEl.textContent = '🔑';
+        if (labelEl) labelEl.textContent = 'Đăng nhập';
+        if (wsBadge) wsBadge.textContent = 'Chế độ Khách (Guest)';
+        if (wsBtn) wsBtn.textContent = '🔑 Đăng nhập / Đăng ký';
+      }
+    }
+
+    function openAuthModal() {
+      const modal = document.getElementById('auth-modal');
+      const loggedView = document.getElementById('auth-logged-in-view');
+      const guestView = document.getElementById('auth-guest-view');
+
+      if (currentAccountEmail) {
+        loggedView.classList.remove('hidden');
+        guestView.classList.add('hidden');
+        document.getElementById('auth-profile-avatar').textContent = appState.playerAvatar || '🧙‍♂️';
+        document.getElementById('auth-profile-name').textContent = appState.playerName || 'Explorer';
+        document.getElementById('auth-profile-email').textContent = currentAccountEmail;
+      } else {
+        loggedView.classList.add('hidden');
+        guestView.classList.remove('hidden');
+        switchAuthMode('login');
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
+    }
+
+    function switchAuthMode(mode) {
+      const loginTab = document.getElementById('auth-tab-login');
+      const regTab = document.getElementById('auth-tab-register');
+      const loginForm = document.getElementById('auth-login-form');
+      const regForm = document.getElementById('auth-register-form');
+
+      if (mode === 'login') {
+        loginTab.className = 'py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-400 text-midnight-950 cursor-pointer';
+        regTab.className = 'py-2 rounded-xl text-astral-200 hover:text-white cursor-pointer';
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+      } else {
+        regTab.className = 'py-2 rounded-xl bg-gradient-to-r from-starlight-pink to-purple-400 text-midnight-950 cursor-pointer';
+        loginTab.className = 'py-2 rounded-xl text-astral-200 hover:text-white cursor-pointer';
+        regForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+
+    function handleExplorerRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
+      const password = document.getElementById('reg-password').value;
+      const avatar = document.querySelector('input[name="reg-avatar"]:checked')?.value || '🧙‍♂️';
+
+      if (!name || !email || !password) return;
+      const accounts = getStoredAccounts();
+      if (accounts.some(acc => acc.email === email)) {
+        showToast('⚠️ Email này đã được đăng ký! Bạn hãy chuyển sang tab Đăng Nhập nhé.');
+        switchAuthMode('login');
+        document.getElementById('login-identifier').value = email;
+        return;
+      }
+
+      accounts.push({ name, email, password, avatar });
+      saveStoredAccounts(accounts);
+
+      currentAccountEmail = email;
+      localStorage.setItem(CURRENT_USER_KEY, email);
+      appState.playerName = name;
+      appState.playerEmail = email;
+      appState.playerAvatar = avatar;
+      appState.words = [];
+      appState.folders = [{ id: 'f_default', name: 'Kho từ cá nhân', icon: '🌿', parentId: null }];
+      appState.streak = 0;
+      appState.exp = 0;
+      appState.studySeconds = 0;
+      appState.simDayOffset = 0;
+      appState.dailyActivity = [0, 0, 0, 0, 0, 0, 0];
+      appState.quizHistory = [];
+      appState.completedOceanIds = [];
+      appState.completedShadowingIds = [];
+      appState.srsStats = {
+        reviewedTodayDay: 0,
+        reviewedTodayCount: 0,
+        newTodayCount: 0,
+        totalCorrect: 0,
+        totalWrong: 0,
+        logs: []
+      };
+      currentForestFolderId = null;
+      forestShowAllWords = false;
+      srsSelectedFolderId = 'ALL';
+      saveState();
+
+      updateAuthUiState();
+      renderHomeDashboard();
+      renderDictionary();
+      renderWorkshopSettings();
+      closeAuthModal();
+      showToast(`🌟 Chào mừng ${avatar} ${name}! Tài khoản mới của bạn bắt đầu từ 0 từ vựng.`);
+    }
+
+    function handleExplorerLogin(e) {
+      e.preventDefault();
+      const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
+      const password = document.getElementById('login-password').value;
+
+      const accounts = getStoredAccounts();
+      const found = accounts.find(acc => (acc.email === identifier || acc.name.toLowerCase() === identifier) && acc.password === password);
+
+      if (!found) {
+        showToast('❌ Sai thông tin đăng nhập hoặc mật khẩu. Nếu chưa có tài khoản, hãy bấm "Đăng Ký Mới"!');
+        return;
+      }
+
+      currentAccountEmail = found.email;
+      localStorage.setItem(CURRENT_USER_KEY, found.email);
+
+      const savedUserRaw = localStorage.getItem(getActiveStorageKey());
+      if (savedUserRaw) {
+        const parsed = JSON.parse(savedUserRaw);
+        appState = { ...appState, ...parsed };
+      } else {
+        appState.playerName = found.name;
+        appState.playerEmail = found.email;
+        appState.playerAvatar = found.avatar || '🧙‍♂️';
+        appState.words = [];
+        appState.folders = [{ id: 'f_default', name: 'Kho từ cá nhân', icon: '🌿', parentId: null }];
+        appState.streak = 0;
+        appState.exp = 0;
+        appState.studySeconds = 0;
+      }
+
+      ensureFoldersAndWordMapping();
+      saveState();
+      updateAuthUiState();
+      renderHomeDashboard();
+      renderDictionary();
+      renderWorkshopSettings();
+      closeAuthModal();
+      showToast(`✨ Chào mừng trở lại, ${appState.playerAvatar} ${appState.playerName}!`);
+    }
+
+    function logoutExplorerAccount() {
+      currentAccountEmail = null;
+      localStorage.removeItem(CURRENT_USER_KEY);
+      appState.playerName = 'Starlight Explorer';
+      appState.playerEmail = '';
+      appState.playerAvatar = '🧙‍♂️';
+      loadState();
+      renderHomeDashboard();
+      renderDictionary();
+      renderWorkshopSettings();
+      closeAuthModal();
+      showToast('🚪 Đã đăng xuất khỏi tài khoản. Bạn đang ở chế độ Khách.');
     }
 
     // Bộ đếm thời gian học thực tế mỗi giây khi người dùng mở trang

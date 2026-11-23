@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta name="google-site-verification" content="H1KCKu_LU4Sai7VFpsgFjy33tXqzaZ8im8xd81h94pY" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LexiMeadow — Land of Words | Magical Storybook Vocabulary</title>
@@ -1414,14 +1413,41 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
 
         <!-- Form Đăng Nhập -->
         <form id="auth-login-form" onsubmit="handleExplorerLogin(event)" class="space-y-3 text-xs sm:text-sm">
+          <!-- Danh sách tài khoản đã từng đăng nhập (1 chạm để đăng nhập nhanh) -->
+          <div id="saved-accounts-box" class="hidden space-y-1.5">
+            <p class="text-[11px] font-bold text-starlight-cyan flex items-center gap-1">
+              <span>⚡</span> <span>Tài khoản đã lưu trên thiết bị (Bấm để vào nhanh):</span>
+            </p>
+            <div id="saved-accounts-list" class="grid grid-cols-1 gap-1.5 max-h-28 overflow-y-auto"></div>
+          </div>
+
+          <!-- Khung báo lỗi trực tiếp khi nhập sai mật khẩu / tài khoản -->
+          <div id="login-error-banner" class="hidden p-3 rounded-2xl bg-rose-500/20 border border-rose-400/60 text-rose-200 text-xs font-semibold flex items-start gap-2">
+            <span class="text-sm shrink-0">⚠️</span>
+            <span id="login-error-text">Sai mật khẩu! Vui lòng kiểm tra lại.</span>
+          </div>
+
           <div>
             <label class="block font-bold text-astral-100 mb-1">Email hoặc Tên đăng nhập *</label>
-            <input id="login-identifier" type="text" required placeholder="VD: explorer@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
+            <input id="login-identifier" type="text" required oninput="clearLoginError()" placeholder="VD: explorer@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
           </div>
           <div>
             <label class="block font-bold text-astral-100 mb-1">Mật khẩu *</label>
-            <input id="login-password" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
+            <div class="relative flex items-center">
+              <input id="login-password" type="password" required oninput="clearLoginError()" placeholder="••••••••" class="w-full pl-3.5 pr-11 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
+              <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-2.5 px-2 py-1 rounded-lg text-astral-800 hover:bg-astral-100 text-sm font-bold cursor-pointer" title="Hiện / Ẩn mật khẩu">
+                👁️
+              </button>
+            </div>
           </div>
+
+          <div class="flex items-center justify-between text-xs pt-0.5">
+            <label class="flex items-center gap-2 text-astral-100 font-semibold cursor-pointer select-none">
+              <input id="login-remember-me" type="checkbox" checked class="w-4 h-4 rounded accent-starlight-cyan cursor-pointer" />
+              <span>Ghi nhớ tài khoản đăng nhập</span>
+            </label>
+          </div>
+
           <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-starlight-cyan via-sky-400 to-indigo-400 text-midnight-950 font-extrabold shadow-lg glow-cyan cursor-pointer">
             🚀 Bước Vào Thế Giới Từ Vựng
           </button>
@@ -1449,7 +1475,12 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
           </div>
           <div>
             <label class="block font-bold text-astral-100 mb-1">Mật khẩu (tối thiểu 4 ký tự) *</label>
-            <input id="reg-password" type="password" minlength="4" required placeholder="Tạo mật khẩu..." class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+            <div class="relative flex items-center">
+              <input id="reg-password" type="password" minlength="4" required placeholder="Tạo mật khẩu..." class="w-full pl-3.5 pr-11 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+              <button type="button" onclick="togglePasswordVisibility('reg-password', this)" class="absolute right-2.5 px-2 py-1 rounded-lg text-astral-800 hover:bg-astral-100 text-sm font-bold cursor-pointer" title="Hiện / Ẩn mật khẩu">
+                👁️
+              </button>
+            </div>
           </div>
           <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-starlight-pink via-purple-400 to-indigo-400 text-midnight-950 font-extrabold shadow-lg glow-pink cursor-pointer">
             🌟 Khởi Tạo Tài Khoản & Bắt Đầu Học
@@ -1470,7 +1501,7 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
     const STORAGE_KEY = 'leximeadow_data_v4';
     const ACCOUNTS_KEY = 'leximeadow_accounts_v1';
     const CURRENT_USER_KEY = 'leximeadow_current_user_v1';
-
+    const REMEMBERED_LOGINS_KEY = 'leximeadow_remembered_logins_v1';
     // Bộ từ vựng tinh tuyển (Destination B1 + Destination B2 + 4000 Essential English Words)
     const INITIAL_WORDS = [
       {
@@ -2340,6 +2371,125 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
     }
 
+    function getRememberedLogins() {
+      try {
+        return JSON.parse(localStorage.getItem(REMEMBERED_LOGINS_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRememberedLogin(accountObj) {
+      let list = getRememberedLogins().filter(item => item.email !== accountObj.email);
+      list.unshift({
+        email: accountObj.email,
+        name: accountObj.name,
+        avatar: accountObj.avatar || '🧙‍♂️',
+        password: accountObj.password
+      });
+      if (list.length > 5) list = list.slice(0, 5);
+      localStorage.setItem(REMEMBERED_LOGINS_KEY, JSON.stringify(list));
+    }
+
+    function removeRememberedLogin(email) {
+      const list = getRememberedLogins().filter(item => item.email !== email);
+      localStorage.setItem(REMEMBERED_LOGINS_KEY, JSON.stringify(list));
+      renderRememberedLoginsList();
+    }
+
+    function togglePasswordVisibility(inputId, btnEl) {
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        if (btnEl) btnEl.textContent = '🙈';
+      } else {
+        inp.type = 'password';
+        if (btnEl) btnEl.textContent = '👁️';
+      }
+    }
+
+    function clearLoginError() {
+      const banner = document.getElementById('login-error-banner');
+      if (banner) banner.classList.add('hidden');
+    }
+
+    function showLoginError(msg) {
+      const banner = document.getElementById('login-error-banner');
+      const textEl = document.getElementById('login-error-text');
+      if (textEl) textEl.textContent = msg;
+      if (banner) banner.classList.remove('hidden');
+    }
+
+    function renderRememberedLoginsList() {
+      const box = document.getElementById('saved-accounts-box');
+      const listEl = document.getElementById('saved-accounts-list');
+      if (!box || !listEl) return;
+
+      const remembered = getRememberedLogins();
+      if (remembered.length === 0) {
+        box.classList.add('hidden');
+        return;
+      }
+
+      box.classList.remove('hidden');
+      listEl.innerHTML = remembered.map(acc => `
+        <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-starlight-cyan/35 transition">
+          <button type="button" onclick="quickLoginRemembered('${acc.email.replace(/'/g, "\\'")}')" class="flex-1 flex items-center gap-2.5 text-left min-w-0 cursor-pointer">
+            <span class="w-8 h-8 rounded-full bg-astral-800 flex items-center justify-center text-base shrink-0">${escapeHtml(acc.avatar || '🧙‍♂️')}</span>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-white truncate">${escapeHtml(acc.name)}</p>
+              <p class="text-[10px] text-starlight-cyan truncate">${escapeHtml(acc.email)}</p>
+            </div>
+          </button>
+          <button type="button" onclick="removeRememberedLogin('${acc.email.replace(/'/g, "\\'")}')" class="px-2 py-1 rounded-lg hover:bg-rose-500/30 text-astral-200 hover:text-rose-200 text-xs cursor-pointer" title="Quên tài khoản này">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function quickLoginRemembered(email) {
+      const remembered = getRememberedLogins().find(item => item.email === email);
+      if (!remembered) return;
+      document.getElementById('login-identifier').value = remembered.email;
+      document.getElementById('login-password').value = remembered.password;
+      document.getElementById('login-remember-me').checked = true;
+      clearLoginError();
+      completeExplorerSignIn(remembered, true);
+    }
+
+    function completeExplorerSignIn(accountObj, shouldRemember) {
+      if (shouldRemember) {
+        saveRememberedLogin(accountObj);
+      }
+
+      currentAccountEmail = accountObj.email;
+      localStorage.setItem(CURRENT_USER_KEY, accountObj.email);
+
+      const savedUserRaw = localStorage.getItem(getActiveStorageKey());
+      if (savedUserRaw) {
+        const parsed = JSON.parse(savedUserRaw);
+        appState = { ...appState, ...parsed };
+      } else {
+        appState.playerName = accountObj.name;
+        appState.playerEmail = accountObj.email;
+        appState.playerAvatar = accountObj.avatar || '🧙‍♂️';
+        appState.words = [];
+        appState.folders = [{ id: 'f_default', name: 'Kho từ cá nhân', icon: '🌿', parentId: null }];
+        appState.streak = 0;
+        appState.exp = 0;
+        appState.studySeconds = 0;
+      }
+
+      ensureFoldersAndWordMapping();
+      saveState();
+      updateAuthUiState();
+      renderHomeDashboard();
+      renderDictionary();
+      renderWorkshopSettings();
+      closeAuthModal();
+      showToast(`✨ Chào mừng trở lại, ${appState.playerAvatar} ${appState.playerName}!`);
+    }
+
     function updateAuthUiState() {
       const avatarEl = document.getElementById('header-user-avatar');
       const labelEl = document.getElementById('header-user-label');
@@ -2373,6 +2523,14 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       } else {
         loggedView.classList.add('hidden');
         guestView.classList.remove('hidden');
+        clearLoginError();
+        renderRememberedLoginsList();
+        const remembered = getRememberedLogins();
+        if (remembered.length > 0) {
+          document.getElementById('login-identifier').value = remembered[0].email;
+          document.getElementById('login-password').value = remembered[0].password;
+          document.getElementById('login-remember-me').checked = true;
+        }
         switchAuthMode('login');
       }
       modal.classList.remove('hidden');
@@ -2419,6 +2577,7 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
 
       accounts.push({ name, email, password, avatar });
       saveStoredAccounts(accounts);
+      saveRememberedLogin({ name, email, password, avatar });
 
       currentAccountEmail = email;
       localStorage.setItem(CURRENT_USER_KEY, email);
@@ -2458,43 +2617,32 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
 
     function handleExplorerLogin(e) {
       e.preventDefault();
+      clearLoginError();
       const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
       const password = document.getElementById('login-password').value;
+      const shouldRemember = document.getElementById('login-remember-me')?.checked ?? true;
 
       const accounts = getStoredAccounts();
-      const found = accounts.find(acc => (acc.email === identifier || acc.name.toLowerCase() === identifier) && acc.password === password);
+      const matchedAccount = accounts.find(acc => acc.email === identifier || acc.name.toLowerCase() === identifier);
 
-      if (!found) {
-        showToast('❌ Sai thông tin đăng nhập hoặc mật khẩu. Nếu chưa có tài khoản, hãy bấm "Đăng Ký Mới"!');
+      if (!matchedAccount) {
+        showLoginError('Tài khoản này chưa tồn tại! Vui lòng kiểm tra lại Email/Tên hoặc chuyển sang tab "Đăng Ký Mới".');
+        showToast('❌ Không tìm thấy tài khoản!');
         return;
       }
 
-      currentAccountEmail = found.email;
-      localStorage.setItem(CURRENT_USER_KEY, found.email);
-
-      const savedUserRaw = localStorage.getItem(getActiveStorageKey());
-      if (savedUserRaw) {
-        const parsed = JSON.parse(savedUserRaw);
-        appState = { ...appState, ...parsed };
-      } else {
-        appState.playerName = found.name;
-        appState.playerEmail = found.email;
-        appState.playerAvatar = found.avatar || '🧙‍♂️';
-        appState.words = [];
-        appState.folders = [{ id: 'f_default', name: 'Kho từ cá nhân', icon: '🌿', parentId: null }];
-        appState.streak = 0;
-        appState.exp = 0;
-        appState.studySeconds = 0;
+      if (matchedAccount.password !== password) {
+        showLoginError('Nhập sai mật khẩu! Vui lòng kiểm tra lại mật khẩu (bấm biểu tượng 👁️ để xem ký tự đã gõ).');
+        showToast('❌ Nhập sai mật khẩu!');
+        const pwInput = document.getElementById('login-password');
+        if (pwInput) {
+          pwInput.focus();
+          pwInput.select();
+        }
+        return;
       }
 
-      ensureFoldersAndWordMapping();
-      saveState();
-      updateAuthUiState();
-      renderHomeDashboard();
-      renderDictionary();
-      renderWorkshopSettings();
-      closeAuthModal();
-      showToast(`✨ Chào mừng trở lại, ${appState.playerAvatar} ${appState.playerName}!`);
+      completeExplorerSignIn(matchedAccount, shouldRemember);
     }
 
     function logoutExplorerAccount() {

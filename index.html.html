@@ -8,7 +8,7 @@
   <!-- Google Fonts: Nghệ thuật cổ tích mềm mại + Tiếng Việt hiện đại sắc nét -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link hrefa="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS CDN & Bảng màu Fantasy Dreamscape -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1415,6 +1415,73 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
             ✨ Đăng Ký Mới
           </button>
         </div>
+
+        <!-- Tài khoản đã từng đăng nhập (Ghi nhớ) -->
+        <div id="saved-accounts-box" class="hidden space-y-2 p-3 rounded-2xl bg-midnight-950/70 border border-starlight-cyan/30">
+          <p class="text-[11px] font-bold text-starlight-cyan flex items-center gap-1.5">
+            <span>⚡</span> <span>Tài khoản đã nhớ trên trình duyệt này (Bấm 1 chạm để vào):</span>
+          </p>
+          <div id="saved-accounts-list" class="space-y-1.5"></div>
+        </div>
+
+        <!-- Form Đăng Nhập -->
+        <form id="auth-login-form" onsubmit="handleExplorerLogin(event)" class="space-y-3 text-xs sm:text-sm">
+          <div id="login-error-banner" class="hidden p-3 rounded-2xl bg-rose-500/20 border border-rose-400 text-rose-200 text-xs font-semibold flex items-start gap-2">
+            <span class="text-base leading-none">⚠️</span>
+            <span id="login-error-text">Tài khoản chưa tồn tại hoặc sai mật khẩu!</span>
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Email hoặc Tên đăng nhập *</label>
+            <input id="login-identifier" type="text" required oninput="clearLoginError()" placeholder="VD: thaovan2008193@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Mật khẩu *</label>
+            <div class="relative">
+              <input id="login-password" type="password" required oninput="clearLoginError()" placeholder="Nhập mật khẩu của bạn..." class="w-full pl-3.5 pr-11 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
+              <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg hover:bg-purple-100 text-midnight-900 flex items-center justify-center text-sm cursor-pointer" title="Hiện / Ẩn mật khẩu">👁️</button>
+            </div>
+          </div>
+          <label class="flex items-center gap-2 text-xs text-astral-100 cursor-pointer select-none">
+            <input id="login-remember-me" type="checkbox" checked class="accent-starlight-cyan w-4 h-4 rounded" />
+            <span>Ghi nhớ tài khoản đăng nhập cho lần sau</span>
+          </label>
+          <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-cyan-400 to-indigo-400 hover:opacity-95 text-midnight-950 font-extrabold shadow-lg glow-cyan cursor-pointer">
+            🚀 Bước Vào Thế Giới Từ Vựng
+          </button>
+        </form>
+
+        <!-- Form Đăng Ký -->
+        <form id="auth-register-form" onsubmit="handleExplorerRegister(event)" class="hidden space-y-3 text-xs sm:text-sm">
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Chọn biểu tượng Tinh linh đại diện</label>
+            <div class="grid grid-cols-5 gap-2 text-center text-lg">
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧙‍♂️" checked class="hidden peer" /><div class="py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-cyan peer-checked:text-midnight-950 border border-white/20">🧙‍♂️</div></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧚" class="hidden peer" /><div class="py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-pink peer-checked:text-midnight-950 border border-white/20">🧚</div></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧝‍♀️" class="hidden peer" /><div class="py-2 rounded-xl bg-white/10 peer-checked:bg-emerald-300 peer-checked:text-midnight-950 border border-white/20">🧝‍♀️</div></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🦊" class="hidden peer" /><div class="py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-yellow peer-checked:text-midnight-950 border border-white/20">🦊</div></label>
+              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🦉" class="hidden peer" /><div class="py-2 rounded-xl bg-white/10 peer-checked:bg-purple-300 peer-checked:text-midnight-950 border border-white/20">🦉</div></label>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Tên Nhà Thám Hiểm *</label>
+            <input id="reg-name" type="text" required placeholder="VD: Thảo Vân" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Email đăng ký *</label>
+            <input id="reg-email" type="email" required placeholder="VD: thaovan2008193@gmail.com" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block font-bold text-astral-100 mb-1">Mật khẩu *</label>
+            <div class="relative">
+              <input id="reg-password" type="password" required minlength="4" placeholder="Tối thiểu 4 ký tự..." class="w-full pl-3.5 pr-11 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
+              <button type="button" onclick="togglePasswordVisibility('reg-password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg hover:bg-purple-100 text-midnight-900 flex items-center justify-center text-sm cursor-pointer" title="Hiện / Ẩn mật khẩu">👁️</button>
+            </div>
+          </div>
+          <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-starlight-pink to-purple-400 hover:opacity-95 text-midnight-950 font-extrabold shadow-lg glow-pink cursor-pointer">
+            ✨ Tạo Tài Khoản & Lưu Tiến Độ
+          </button>
+        </form>
+
         <div class="pt-2 border-t border-astral-400/20 flex flex-col gap-2 text-center">
           <div class="flex flex-wrap items-center justify-center gap-2">
             <label class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-starlight-cyan/35 text-[11px] font-bold text-starlight-cyan cursor-pointer">
@@ -2630,19 +2697,27 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
     }
 
     async function handleExplorerLogin(e) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       clearLoginError();
-      const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
-      const password = document.getElementById('login-password').value;
+      const idInput = document.getElementById('login-identifier');
+      const pwInput = document.getElementById('login-password');
+      const identifier = (idInput?.value || '').trim().toLowerCase();
+      const password = pwInput?.value || '';
       const shouldRemember = document.getElementById('login-remember-me')?.checked ?? true;
+
+      if (!identifier || !password) {
+        showLoginError('Vui lòng nhập đầy đủ Email/Tên đăng nhập và Mật khẩu!');
+        return;
+      }
 
       let accounts = getStoredAccounts();
       let matchedAccount = accounts.find(acc => acc.email === identifier || acc.name.toLowerCase() === identifier);
 
-      // Nếu chưa có ở máy hiện tại, tự động kiểm tra trên Cloud Sync
+      // Nếu chưa có ở máy hiện tại, thử kiểm tra trên Cloud Sync (có giới hạn timeout 1.5s để không treo nút bấm)
       if (!matchedAccount && identifier.includes('@') && typeof window.pullAccountFromCloud === 'function') {
         try {
-          const cloudData = await window.pullAccountFromCloud(identifier);
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 1500));
+          const cloudData = await Promise.race([window.pullAccountFromCloud(identifier), timeoutPromise]);
           if (cloudData && cloudData.account) {
             matchedAccount = cloudData.account;
             accounts.push(matchedAccount);
@@ -2652,12 +2727,12 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
             }
           }
         } catch (err) {
-          console.warn('Cloud lookup failed:', err);
+          console.warn('Cloud lookup skipped:', err);
         }
       }
 
       if (!matchedAccount) {
-        showLoginError('Tài khoản này chưa có trên trình duyệt này! Nếu bạn tạo nick ở web khác, hãy bấm "🔑 Nhập Mã Đồng Bộ từ web khác" hoặc "📥 Khôi phục từ file JSON" bên dưới.');
+        showLoginError('Tài khoản này chưa có trên trình duyệt này! Nếu bạn tạo nick ở web khác, hãy bấm "🔑 Nhập Mã Đồng Bộ từ web khác" hoặc chuyển sang tab "✨ Đăng Ký Mới".');
         showToast('❌ Không tìm thấy tài khoản trên trình duyệt này!');
         return;
       }
@@ -2665,7 +2740,6 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       if (matchedAccount.password !== password) {
         showLoginError('Nhập sai mật khẩu! Vui lòng kiểm tra lại mật khẩu (bấm biểu tượng 👁️ để xem ký tự đã gõ).');
         showToast('❌ Nhập sai mật khẩu!');
-        const pwInput = document.getElementById('login-password');
         if (pwInput) {
           pwInput.focus();
           pwInput.select();

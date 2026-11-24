@@ -8,7 +8,7 @@
   <!-- Google Fonts: Nghệ thuật cổ tích mềm mại + Tiếng Việt hiện đại sắc nét -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <link hrefa="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel+Decorative:wght@700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS CDN & Bảng màu Fantasy Dreamscape -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1081,6 +1081,11 @@
             </div>
             <div class="pt-2 border-t border-purple-200 flex flex-wrap gap-2 text-xs">
               <button type="button" onclick="exportBackupJson()" class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white font-bold cursor-pointer">📤 Xuất file sao lưu JSON</button>
+              <label class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold cursor-pointer">
+                📥 Nhập file sao lưu JSON
+                <input type="file" accept=".json,application/json" onchange="importBackupJson(event)" class="hidden" />
+              </label>
+              <button type="button" onclick="copyCloudSyncCode()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-midnight-950 font-extrabold cursor-pointer">🔑 Sao chép Mã Đồng Bộ</button>
               <button type="button" onclick="resetDemoData()" class="px-3.5 py-2 rounded-xl bg-rose-100 text-rose-900 font-bold cursor-pointer">🔄 Reset dữ liệu gốc</button>
             </div>
           </div>
@@ -1410,84 +1415,16 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
             ✨ Đăng Ký Mới
           </button>
         </div>
-
-        <!-- Form Đăng Nhập -->
-        <form id="auth-login-form" onsubmit="handleExplorerLogin(event)" class="space-y-3 text-xs sm:text-sm">
-          <!-- Danh sách tài khoản đã từng đăng nhập (1 chạm để đăng nhập nhanh) -->
-          <div id="saved-accounts-box" class="hidden space-y-1.5">
-            <p class="text-[11px] font-bold text-starlight-cyan flex items-center gap-1">
-              <span>⚡</span> <span>Tài khoản đã lưu trên thiết bị (Bấm để vào nhanh):</span>
-            </p>
-            <div id="saved-accounts-list" class="grid grid-cols-1 gap-1.5 max-h-28 overflow-y-auto"></div>
-          </div>
-
-          <!-- Khung báo lỗi trực tiếp khi nhập sai mật khẩu / tài khoản -->
-          <div id="login-error-banner" class="hidden p-3 rounded-2xl bg-rose-500/20 border border-rose-400/60 text-rose-200 text-xs font-semibold flex items-start gap-2">
-            <span class="text-sm shrink-0">⚠️</span>
-            <span id="login-error-text">Sai mật khẩu! Vui lòng kiểm tra lại.</span>
-          </div>
-
-          <div>
-            <label class="block font-bold text-astral-100 mb-1">Email hoặc Tên đăng nhập *</label>
-            <input id="login-identifier" type="text" required oninput="clearLoginError()" placeholder="VD: explorer@gmail.com" class="w-full px-3.5 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
-          </div>
-          <div>
-            <label class="block font-bold text-astral-100 mb-1">Mật khẩu *</label>
-            <div class="relative flex items-center">
-              <input id="login-password" type="password" required oninput="clearLoginError()" placeholder="••••••••" class="w-full pl-3.5 pr-11 py-2.5 rounded-xl fantasy-input font-semibold focus:outline-none" />
-              <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-2.5 px-2 py-1 rounded-lg text-astral-800 hover:bg-astral-100 text-sm font-bold cursor-pointer" title="Hiện / Ẩn mật khẩu">
-                👁️
-              </button>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between text-xs pt-0.5">
-            <label class="flex items-center gap-2 text-astral-100 font-semibold cursor-pointer select-none">
-              <input id="login-remember-me" type="checkbox" checked class="w-4 h-4 rounded accent-starlight-cyan cursor-pointer" />
-              <span>Ghi nhớ tài khoản đăng nhập</span>
+        <div class="pt-2 border-t border-astral-400/20 flex flex-col gap-2 text-center">
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <label class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-starlight-cyan/35 text-[11px] font-bold text-starlight-cyan cursor-pointer">
+              📥 Khôi phục từ file JSON
+              <input type="file" accept=".json,application/json" onchange="importBackupJson(event)" class="hidden" />
             </label>
+            <button type="button" onclick="promptPasteSyncCode()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-starlight-yellow/35 text-[11px] font-bold text-starlight-yellow cursor-pointer">
+              🔑 Nhập Mã Đồng Bộ từ web khác
+            </button>
           </div>
-
-          <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-starlight-cyan via-sky-400 to-indigo-400 text-midnight-950 font-extrabold shadow-lg glow-cyan cursor-pointer">
-            🚀 Bước Vào Thế Giới Từ Vựng
-          </button>
-        </form>
-
-        <!-- Form Đăng Ký -->
-        <form id="auth-register-form" onsubmit="handleExplorerRegister(event)" class="hidden space-y-3 text-xs sm:text-sm">
-          <div>
-            <label class="block font-bold text-astral-100 mb-1">Chọn Tinh Linh Đại Diện</label>
-            <div class="grid grid-cols-5 gap-2">
-              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧙‍♂️" checked class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-cyan peer-checked:text-midnight-950 text-xl border border-white/15">🧙‍♂️</span></label>
-              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧚" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-pink peer-checked:text-midnight-950 text-xl border border-white/15">🧚</span></label>
-              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🧝‍♀️" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-yellow peer-checked:text-midnight-950 text-xl border border-white/15">🧝‍♀️</span></label>
-              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🦊" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-cyan peer-checked:text-midnight-950 text-xl border border-white/15">🦊</span></label>
-              <label class="cursor-pointer"><input type="radio" name="reg-avatar" value="🦉" class="hidden peer" /><span class="flex items-center justify-center py-2 rounded-xl bg-white/10 peer-checked:bg-starlight-pink peer-checked:text-midnight-950 text-xl border border-white/15">🦉</span></label>
-            </div>
-          </div>
-          <div>
-            <label class="block font-bold text-astral-100 mb-1">Tên Nhà Thám Hiểm *</label>
-            <input id="reg-name" type="text" required placeholder="VD: Lyra Moonwalker" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
-          </div>
-          <div>
-            <label class="block font-bold text-astral-100 mb-1">Email *</label>
-            <input id="reg-email" type="email" required placeholder="VD: lyra@leximeadow.world" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
-          </div>
-          <div>
-            <label class="block font-bold text-astral-100 mb-1">Mật khẩu (tối thiểu 4 ký tự) *</label>
-            <div class="relative flex items-center">
-              <input id="reg-password" type="password" minlength="4" required placeholder="Tạo mật khẩu..." class="w-full pl-3.5 pr-11 py-2 rounded-xl fantasy-input font-semibold focus:outline-none" />
-              <button type="button" onclick="togglePasswordVisibility('reg-password', this)" class="absolute right-2.5 px-2 py-1 rounded-lg text-astral-800 hover:bg-astral-100 text-sm font-bold cursor-pointer" title="Hiện / Ẩn mật khẩu">
-                👁️
-              </button>
-            </div>
-          </div>
-          <button type="submit" class="w-full py-3 rounded-2xl bg-gradient-to-r from-starlight-pink via-purple-400 to-indigo-400 text-midnight-950 font-extrabold shadow-lg glow-pink cursor-pointer">
-            🌟 Khởi Tạo Tài Khoản & Bắt Đầu Học
-          </button>
-        </form>
-
-        <div class="pt-2 border-t border-astral-400/20 text-center">
           <button type="button" onclick="closeAuthModal()" class="text-xs text-astral-200 hover:text-starlight-cyan underline cursor-pointer">
             Tiếp tục trải nghiệm nhanh với tư cách Khách
           </button>
@@ -1496,7 +1433,75 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
     </div>
   </div>
 
+  <!-- ==================== MODAL 6: NHẬP MÃ ĐỒNG BỘ ĐA THIẾT BỊ ==================== -->
+  <div id="sync-code-modal" class="fixed inset-0 z-50 hidden bg-midnight-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="storybook-parchment rounded-3xl max-w-lg w-full p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-purple-200 pb-3">
+        <h3 class="font-serif text-xl font-bold text-midnight-950">🔑 Đồng Bộ Tài Khoản Từ Web / Thiết Bị Khác</h3>
+        <button type="button" onclick="closeSyncCodeModal()" class="w-8 h-8 rounded-full bg-astral-100 hover:bg-rose-200 font-bold text-midnight-900 cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs text-astral-800 leading-relaxed">
+        Dán <strong>Mã Đồng Bộ (Sync Code)</strong> đã sao chép từ trình duyệt/web cũ vào ô bên dưới để mang toàn bộ tài khoản, mật khẩu, thư mục và từ vựng sang trang này:
+      </p>
+      <textarea id="sync-code-textarea" rows="4" placeholder="Dán mã đồng bộ LEXI_SYNC_... tại đây" class="w-full p-3 rounded-2xl fantasy-input text-xs font-mono focus:outline-none"></textarea>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeSyncCodeModal()" class="px-4 py-2 rounded-xl bg-astral-100 text-xs font-bold text-midnight-900 cursor-pointer">Hủy</button>
+        <button type="button" onclick="applyPastedSyncCode()" class="px-5 py-2 rounded-xl bg-astral-800 hover:bg-astral-900 text-white text-xs font-bold cursor-pointer">✨ Khôi Phục & Đăng Nhập</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== JAVASCRIPT LOGIC HOÀN CHỈNH ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    window._cloudSyncReady = false;
+    window._cloudDb = null;
+    window._cloudAuth = null;
+    window._cloudAppId = typeof __app_id !== 'undefined' ? __app_id : 'leximeadow-global';
+
+    (async function initCloudSync() {
+      try {
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          const cfg = JSON.parse(__firebase_config);
+          const app = initializeApp(cfg);
+          const auth = getAuth(app);
+          const db = getFirestore(app);
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+          window._cloudDb = db;
+          window._cloudAuth = auth;
+          window._cloudSyncReady = true;
+
+          window.pushAccountToCloud = async function(accountObj, stateObj) {
+            if (!window._cloudSyncReady || !window._cloudAuth?.currentUser || !accountObj?.email) return;
+            const docId = encodeURIComponent(accountObj.email.toLowerCase());
+            const ref = doc(window._cloudDb, 'artifacts', window._cloudAppId, 'public', 'data', 'leximeadow_cloud_users', docId);
+            await setDoc(ref, {
+              account: accountObj,
+              state: stateObj,
+              updatedAt: Date.now()
+            });
+          };
+
+          window.pullAccountFromCloud = async function(email) {
+            if (!window._cloudSyncReady || !window._cloudAuth?.currentUser || !email) return null;
+            const docId = encodeURIComponent(email.toLowerCase());
+            const ref = doc(window._cloudDb, 'artifacts', window._cloudAppId, 'public', 'data', 'leximeadow_cloud_users', docId);
+            const snap = await getDoc(ref);
+            return snap.exists() ? snap.data() : null;
+          };
+        }
+      } catch (e) {
+        console.warn('Cloud sync running in portable offline mode:', e);
+      }
+    })();
+  </script>
   <script>
     const STORAGE_KEY = 'leximeadow_data_v4';
     const ACCOUNTS_KEY = 'leximeadow_accounts_v1';
@@ -2352,6 +2357,15 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
     function saveState() {
       try {
         localStorage.setItem(getActiveStorageKey(), JSON.stringify(appState));
+        if (currentAccountEmail && typeof window.pushAccountToCloud === 'function') {
+          const acc = getStoredAccounts().find(a => a.email === currentAccountEmail) || {
+            email: currentAccountEmail,
+            name: appState.playerName,
+            avatar: appState.playerAvatar || '🧙‍♂️',
+            password: ''
+          };
+          window.pushAccountToCloud(acc, appState).catch(() => {});
+        }
       } catch (e) {
         console.warn('Không thể lưu vào localStorage:', e);
       }
@@ -2612,22 +2626,39 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       renderDictionary();
       renderWorkshopSettings();
       closeAuthModal();
-      showToast(`🌟 Chào mừng ${avatar} ${name}! Tài khoản mới của bạn bắt đầu từ 0 từ vựng.`);
+      showToast(`🌟 Chào mừng ${avatar} ${name}! Tài khoản mới của bạn đã được kích hoạt & đồng bộ.`);
     }
 
-    function handleExplorerLogin(e) {
+    async function handleExplorerLogin(e) {
       e.preventDefault();
       clearLoginError();
       const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
       const password = document.getElementById('login-password').value;
       const shouldRemember = document.getElementById('login-remember-me')?.checked ?? true;
 
-      const accounts = getStoredAccounts();
-      const matchedAccount = accounts.find(acc => acc.email === identifier || acc.name.toLowerCase() === identifier);
+      let accounts = getStoredAccounts();
+      let matchedAccount = accounts.find(acc => acc.email === identifier || acc.name.toLowerCase() === identifier);
+
+      // Nếu chưa có ở máy hiện tại, tự động kiểm tra trên Cloud Sync
+      if (!matchedAccount && identifier.includes('@') && typeof window.pullAccountFromCloud === 'function') {
+        try {
+          const cloudData = await window.pullAccountFromCloud(identifier);
+          if (cloudData && cloudData.account) {
+            matchedAccount = cloudData.account;
+            accounts.push(matchedAccount);
+            saveStoredAccounts(accounts);
+            if (cloudData.state) {
+              localStorage.setItem(`${STORAGE_KEY}_${matchedAccount.email.toLowerCase()}`, JSON.stringify(cloudData.state));
+            }
+          }
+        } catch (err) {
+          console.warn('Cloud lookup failed:', err);
+        }
+      }
 
       if (!matchedAccount) {
-        showLoginError('Tài khoản này chưa tồn tại! Vui lòng kiểm tra lại Email/Tên hoặc chuyển sang tab "Đăng Ký Mới".');
-        showToast('❌ Không tìm thấy tài khoản!');
+        showLoginError('Tài khoản này chưa có trên trình duyệt này! Nếu bạn tạo nick ở web khác, hãy bấm "🔑 Nhập Mã Đồng Bộ từ web khác" hoặc "📥 Khôi phục từ file JSON" bên dưới.');
+        showToast('❌ Không tìm thấy tài khoản trên trình duyệt này!');
         return;
       }
 
@@ -5535,14 +5566,115 @@ Respond naturally in 1-2 short, conversational English sentences and ask one eng
     }
 
     function exportBackupJson() {
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(appState, null, 2));
+      const backupPayload = {
+        version: 'leximeadow_portable_v1',
+        exportedAt: new Date().toISOString(),
+        account: currentAccountEmail
+          ? (getStoredAccounts().find(a => a.email === currentAccountEmail) || { email: currentAccountEmail, name: appState.playerName, avatar: appState.playerAvatar })
+          : null,
+        state: appState
+      };
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
       const dlAnchor = document.createElement('a');
       dlAnchor.setAttribute('href', dataStr);
-      dlAnchor.setAttribute('download', 'LexiMeadow_Storybook_Backup.json');
+      dlAnchor.setAttribute('download', `LexiMeadow_${(appState.playerName || 'Backup').replace(/\s+/g, '_')}.json`);
       document.body.appendChild(dlAnchor);
       dlAnchor.click();
       dlAnchor.remove();
-      showToast('📤 Đã xuất tệp sao lưu toàn bộ kho từ và tiến độ!');
+      showToast('📤 Đã xuất tệp sao lưu toàn bộ tài khoản, mật khẩu và kho từ!');
+    }
+
+    function applyImportedBundle(bundle) {
+      if (!bundle) return false;
+      const importedState = bundle.state ? bundle.state : (Array.isArray(bundle.words) ? bundle : null);
+      if (!importedState) return false;
+
+      if (bundle.account && bundle.account.email) {
+        const accounts = getStoredAccounts();
+        const idx = accounts.findIndex(a => a.email === bundle.account.email);
+        if (idx >= 0) accounts[idx] = { ...accounts[idx], ...bundle.account };
+        else accounts.push(bundle.account);
+        saveStoredAccounts(accounts);
+        if (bundle.account.password) saveRememberedLogin(bundle.account);
+
+        currentAccountEmail = bundle.account.email;
+        localStorage.setItem(CURRENT_USER_KEY, currentAccountEmail);
+      }
+
+      appState = { ...appState, ...importedState };
+      ensureFoldersAndWordMapping();
+      saveState();
+      updateAuthUiState();
+      renderHomeDashboard();
+      renderDictionary();
+      renderWorkshopSettings();
+      return true;
+    }
+
+    function importBackupJson(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (applyImportedBundle(parsed)) {
+            closeAuthModal();
+            showToast(`✅ Đã khôi phục thành công tài khoản ${appState.playerName} (${appState.words.length} từ)!`);
+          } else {
+            showToast('❌ Tệp JSON không hợp lệ.');
+          }
+        } catch (err) {
+          showToast('❌ Không thể đọc tệp JSON này.');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function copyCloudSyncCode() {
+      const backupPayload = {
+        account: currentAccountEmail
+          ? (getStoredAccounts().find(a => a.email === currentAccountEmail) || { email: currentAccountEmail, name: appState.playerName, avatar: appState.playerAvatar })
+          : null,
+        state: appState
+      };
+      const encoded = 'LEXI_SYNC_' + btoa(unescape(encodeURIComponent(JSON.stringify(backupPayload))));
+      const tempInput = document.createElement('textarea');
+      tempInput.value = encoded;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      tempInput.remove();
+      showToast('🔑 Đã sao chép Mã Đồng Bộ! Bạn có thể dán mã này ở bất kỳ web/trình duyệt nào khác.');
+    }
+
+    function promptPasteSyncCode() {
+      document.getElementById('sync-code-textarea').value = '';
+      document.getElementById('sync-code-modal').classList.remove('hidden');
+    }
+
+    function closeSyncCodeModal() {
+      document.getElementById('sync-code-modal').classList.add('hidden');
+    }
+
+    function applyPastedSyncCode() {
+      const raw = (document.getElementById('sync-code-textarea')?.value || '').trim();
+      if (!raw.startsWith('LEXI_SYNC_')) {
+        showToast('❌ Mã đồng bộ không đúng định dạng (phải bắt đầu bằng LEXI_SYNC_).');
+        return;
+      }
+      try {
+        const jsonStr = decodeURIComponent(escape(atob(raw.replace('LEXI_SYNC_', ''))));
+        const parsed = JSON.parse(jsonStr);
+        if (applyImportedBundle(parsed)) {
+          closeSyncCodeModal();
+          closeAuthModal();
+          showToast(`🌟 Đã đồng bộ & đăng nhập tài khoản ${appState.playerName} thành công!`);
+        }
+      } catch (e) {
+        showToast('❌ Mã đồng bộ bị lỗi hoặc thiếu ký tự.');
+      }
     }
 
     // ==================== HIỆU ỨNG BỤI SAO & PARALLAX NGÂN HÀ ====================

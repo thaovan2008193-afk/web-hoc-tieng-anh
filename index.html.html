@@ -1053,6 +1053,10 @@
                   <input id="set-reminder-time" type="time" value="20:00" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-bold focus:outline-none" />
                 </div>
               </div>
+              <div>
+                <label class="block font-bold text-midnight-900 mb-1">✨ Gemini API Key (Dùng cho AI Nhập Từ/Ảnh & Calling 1-1 trên Vercel)</label>
+                <input id="set-gemini-api-key" type="password" placeholder="Dán mã AIzaSy... (Tùy chọn - có sẵn từ điển tự động nếu bỏ trống)" class="w-full px-3.5 py-2 rounded-xl fantasy-input font-mono text-xs focus:outline-none" />
+              </div>
               <div class="flex flex-wrap gap-2">
                 <button type="button" onclick="saveWorkshopSettings()" class="flex-1 py-2.5 rounded-xl bg-astral-800 hover:bg-astral-900 text-white font-bold shadow-sm cursor-pointer">
                   💾 Lưu cài đặt hồ sơ
@@ -1273,9 +1277,19 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       <div class="flex items-center justify-between border-b border-purple-200 pb-3">
         <div>
           <h3 class="font-serif text-xl sm:text-2xl font-bold text-midnight-950">✨ Trích Xuất Từ Vựng Tự Động Bằng AI</h3>
-          <p class="text-xs text-astral-800">Dán từ vựng, đoạn văn tiếng Anh hoặc tải ảnh thẻ/sách — AI sẽ tự động điền IPA, nghĩa, ví dụ dịch Việt, Word Family & Synonyms.</p>
+          <p class="text-xs text-astral-800">Dán từ vựng, đoạn văn tiếng Anh hoặc tải ảnh thẻ/sách — tự động điền IPA, nghĩa, ví dụ dịch Việt, Word Family & Synonyms.</p>
         </div>
         <button type="button" onclick="closeAiImportModal()" class="w-8 h-8 rounded-full bg-astral-100 hover:bg-rose-200 font-bold text-midnight-900 cursor-pointer">✕</button>
+      </div>
+
+      <!-- Khung cấu hình Gemini API Key (Tùy chọn, nếu bỏ trống sẽ tự động dùng Từ điển Thông minh) -->
+      <div class="p-3 rounded-2xl bg-indigo-50/90 border border-indigo-200 space-y-1.5 text-xs">
+        <div class="flex flex-wrap items-center justify-between gap-1">
+          <label for="ai-imp-apikey" class="font-bold text-indigo-950">🔑 Gemini API Key (Tùy chọn — dùng khi tải ảnh hoặc phân tích đoạn văn dài):</label>
+          <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="text-indigo-700 font-bold underline">Lấy key miễn phí ↗</a>
+        </div>
+        <input id="ai-imp-apikey" type="password" onchange="saveInlineApiKey(this.value)" placeholder="Dán mã AIzaSy... vào đây (Nếu bỏ trống, nhập danh sách từ tiếng Anh vẫn tự động tra cứu đầy đủ!)"
+               class="w-full px-3 py-2 rounded-xl fantasy-input text-xs font-mono focus:outline-none" />
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1574,6 +1588,7 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
     const ACCOUNTS_KEY = 'leximeadow_accounts_v1';
     const CURRENT_USER_KEY = 'leximeadow_current_user_v1';
     const REMEMBERED_LOGINS_KEY = 'leximeadow_remembered_logins_v1';
+    const GEMINI_API_KEY_STORAGE = 'leximeadow_gemini_api_key_v1';
     // Bộ từ vựng tinh tuyển (Destination B1 + Destination B2 + 4000 Essential English Words)
     const INITIAL_WORDS = [
       {
@@ -3330,10 +3345,24 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       showToast('🗑️ Đã xóa từ "' + target.word + '" khỏi kho từ.');
     }
 
-    // --- AI Auto Import (Text & Image via Gemini API) ---
+    // --- AI Auto Import (Text & Image via Gemini API + Smart Dictionary Fallback) ---
+    function getGeminiApiKey() {
+      return (localStorage.getItem(GEMINI_API_KEY_STORAGE) || '').trim();
+    }
+
+    function saveInlineApiKey(val) {
+      const clean = (val || '').trim();
+      localStorage.setItem(GEMINI_API_KEY_STORAGE, clean);
+      const wsInput = document.getElementById('set-gemini-api-key');
+      if (wsInput) wsInput.value = clean;
+      if (clean) showToast('🔑 Đã lưu Gemini API Key của bạn!');
+    }
+
     function openAiImportModal() {
       const defaultFolder = currentForestFolderId || 'f_default';
       populateFolderSelects(defaultFolder);
+      const keyInp = document.getElementById('ai-imp-apikey');
+      if (keyInp) keyInp.value = getGeminiApiKey();
       document.getElementById('ai-import-modal').classList.remove('hidden');
     }
 
@@ -3365,10 +3394,10 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       if (wrap) wrap.classList.add('hidden');
     }
 
-    async function callGeminiWithRetry(payload, maxRetries = 3) {
-      const apiKey = '';
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-      let delay = 1000;
+    async function callGeminiWithRetry(payload, maxRetries = 2) {
+      const apiKey = getGeminiApiKey();
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+      let delay = 800;
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           const response = await fetch(apiUrl, {
@@ -3384,6 +3413,105 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
           delay *= 2;
         }
       }
+    }
+
+    // Bộ tra cứu từ điển thông minh dự phòng (hoạt động không cần API Key)
+    async function smartLookupWordsWithoutApiKey(rawText) {
+      const stopWords = new Set(['the', 'and', 'for', 'that', 'this', 'with', 'from', 'have', 'are', 'was', 'were', 'been', 'will', 'would', 'could', 'should', 'into', 'about', 'there', 'their', 'which', 'when', 'where', 'what', 'your', 'they', 'them', 'more', 'some', 'such', 'than', 'very', 'also', 'many', 'most', 'other', 'only']);
+      const tokens = rawText
+        .split(/[\n,;]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      let candidateWords = [];
+      if (tokens.length > 1 || (tokens.length === 1 && tokens[0].split(/\s+/).length <= 3)) {
+        candidateWords = tokens.slice(0, 8);
+      } else {
+        const extracted = (rawText.match(/[a-zA-Z]{4,}/g) || [])
+          .map(w => w.toLowerCase())
+          .filter(w => !stopWords.has(w));
+        candidateWords = [...new Set(extracted)].slice(0, 8);
+      }
+
+      const results = [];
+      for (const rawWord of candidateWords) {
+        const cleanWord = rawWord.replace(/[^a-zA-Z\s-]/g, '').trim();
+        if (!cleanWord) continue;
+        const capWord = cleanWord.charAt(0).toUpperCase() + cleanWord.slice(1);
+
+        let ipa = '';
+        let pos = 'noun';
+        let meaningEn = '';
+        let example = '';
+        let synonyms = [];
+        let antonyms = [];
+        let meaningVi = '';
+
+        // 1. Tra từ điển Anh-Anh miễn phí (Free Dictionary API) để lấy IPA, POS, định nghĩa, ví dụ, đồng nghĩa
+        try {
+          const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord.toLowerCase())}`);
+          if (dictRes.ok) {
+            const dictJson = await dictRes.json();
+            const entry = dictJson?.[0];
+            if (entry) {
+              ipa = entry.phonetic || (entry.phonetics?.find(p => p.text)?.text) || '';
+              const firstMeaning = entry.meanings?.[0];
+              if (firstMeaning) {
+                pos = firstMeaning.partOfSpeech || 'noun';
+                const defObj = firstMeaning.definitions?.[0];
+                meaningEn = defObj?.definition || '';
+                example = defObj?.example || '';
+                synonyms = (firstMeaning.synonyms || defObj?.synonyms || []).slice(0, 4);
+                antonyms = (firstMeaning.antonyms || defObj?.antonyms || []).slice(0, 3);
+              }
+            }
+          }
+        } catch (e) {}
+
+        // 2. Dịch sang tiếng Việt qua MyMemory Translation API miễn phí
+        try {
+          const trRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanWord)}&langpair=en|vi`);
+          if (trRes.ok) {
+            const trJson = await trRes.json();
+            const translated = trJson?.responseData?.translatedText || '';
+            if (translated && translated.toLowerCase() !== cleanWord.toLowerCase()) {
+              meaningVi = translated.charAt(0).toUpperCase() + translated.slice(1);
+            }
+          }
+        } catch (e) {}
+
+        if (!meaningVi) {
+          meaningVi = meaningEn ? `Nghĩa: ${meaningEn}` : `Từ vựng tiếng Anh (${capWord})`;
+        }
+        if (!example) {
+          example = `We learned how to use "${cleanWord.toLowerCase()}" naturally in context.`;
+        }
+
+        let exampleVi = '';
+        try {
+          const exTrRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(example)}&langpair=en|vi`);
+          if (exTrRes.ok) {
+            const exTrJson = await exTrRes.json();
+            exampleVi = exTrJson?.responseData?.translatedText || '';
+          }
+        } catch (e) {}
+
+        results.push({
+          word: capWord,
+          ipa,
+          pos,
+          level: 'B1',
+          meaningVi,
+          meaningEn,
+          example,
+          exampleVi,
+          wordFamily: [],
+          collocations: [],
+          synonyms,
+          antonyms
+        });
+      }
+      return results;
     }
 
     async function runAiAutoImport() {
@@ -3402,7 +3530,12 @@ Substantial | Đáng kể, lớn lao | /səbˈstænʃl/ | adjective | She inheri
       if (loadingEl) loadingEl.classList.remove('hidden');
       if (submitBtn) submitBtn.disabled = true;
 
-      const promptText = `You are an expert English teacher for Vietnamese learners. Extract up to 8 key English vocabulary words from the provided ${aiImportImageBase64 ? 'image and/or ' : ''}text.
+      let parsedWords = [];
+      const hasApiKey = Boolean(getGeminiApiKey());
+
+      try {
+        if (hasApiKey) {
+          const promptText = `You are an expert English teacher for Vietnamese learners. Extract up to 8 key English vocabulary words from the provided ${aiImportImageBase64 ? 'image and/or ' : ''}text.
 For each word, provide:
 - word (English word/phrase, capitalized first letter)
 - ipa (British/American IPA transcription, e.g. /ɪnˈvaɪrənmənt/)
@@ -3418,48 +3551,56 @@ For each word, provide:
 - antonyms (array of 1-3 English antonyms)
 User input text: "${rawText}"`;
 
-      const parts = [{ text: promptText }];
-      if (aiImportImageBase64) {
-        parts.push({
-          inlineData: {
-            mimeType: aiImportImageMime,
-            data: aiImportImageBase64
+          const parts = [{ text: promptText }];
+          if (aiImportImageBase64) {
+            parts.push({
+              inlineData: {
+                mimeType: aiImportImageMime,
+                data: aiImportImageBase64
+              }
+            });
           }
-        });
-      }
 
-      const payload = {
-        contents: [{ role: 'user', parts }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'ARRAY',
-            items: {
-              type: 'OBJECT',
-              properties: {
-                word: { type: 'STRING' },
-                ipa: { type: 'STRING' },
-                pos: { type: 'STRING' },
-                level: { type: 'STRING' },
-                meaningVi: { type: 'STRING' },
-                meaningEn: { type: 'STRING' },
-                example: { type: 'STRING' },
-                exampleVi: { type: 'STRING' },
-                wordFamily: { type: 'ARRAY', items: { type: 'STRING' } },
-                collocations: { type: 'ARRAY', items: { type: 'STRING' } },
-                synonyms: { type: 'ARRAY', items: { type: 'STRING' } },
-                antonyms: { type: 'ARRAY', items: { type: 'STRING' } }
-              },
-              required: ['word', 'ipa', 'pos', 'meaningVi', 'example', 'exampleVi', 'synonyms']
+          const payload = {
+            contents: [{ role: 'user', parts }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: 'ARRAY',
+                items: {
+                  type: 'OBJECT',
+                  properties: {
+                    word: { type: 'STRING' },
+                    ipa: { type: 'STRING' },
+                    pos: { type: 'STRING' },
+                    level: { type: 'STRING' },
+                    meaningVi: { type: 'STRING' },
+                    meaningEn: { type: 'STRING' },
+                    example: { type: 'STRING' },
+                    exampleVi: { type: 'STRING' },
+                    wordFamily: { type: 'ARRAY', items: { type: 'STRING' } },
+                    collocations: { type: 'ARRAY', items: { type: 'STRING' } },
+                    synonyms: { type: 'ARRAY', items: { type: 'STRING' } },
+                    antonyms: { type: 'ARRAY', items: { type: 'STRING' } }
+                  },
+                  required: ['word', 'ipa', 'pos', 'meaningVi', 'example', 'exampleVi', 'synonyms']
+                }
+              }
             }
-          }
-        }
-      };
+          };
 
-      try {
-        const result = await callGeminiWithRetry(payload);
-        const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-        const parsedWords = JSON.parse(jsonText || '[]');
+          const result = await callGeminiWithRetry(payload);
+          const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+          parsedWords = JSON.parse(jsonText || '[]');
+        } else if (aiImportImageBase64 && !rawText) {
+          showToast('🔑 Để đọc chữ từ hình ảnh, bạn hãy dán Gemini API Key miễn phí vào ô phía trên nhé!');
+          return;
+        }
+
+        // Nếu không có Gemini API Key hoặc Gemini trả về rỗng -> dùng Từ điển Thông minh tự động tra cứu
+        if ((!Array.isArray(parsedWords) || parsedWords.length === 0) && rawText) {
+          parsedWords = await smartLookupWordsWithoutApiKey(rawText);
+        }
 
         if (Array.isArray(parsedWords) && parsedWords.length > 0) {
           parsedWords.forEach((item, idx) => {
@@ -3490,13 +3631,36 @@ User input text: "${rawText}"`;
           closeAiImportModal();
           document.getElementById('ai-imp-text').value = '';
           clearAiImportImage();
-          gainExp(parsedWords.length * 10, `AI trích xuất ${parsedWords.length} từ`);
+          gainExp(parsedWords.length * 10, `Trích xuất tự động ${parsedWords.length} từ`);
         } else {
-          showToast('AI chưa tìm thấy từ vựng rõ ràng. Bạn hãy thử ảnh rõ nét hơn hoặc nhập từ khóa nhé!');
+          showToast('Chưa tìm thấy từ vựng phù hợp. Bạn hãy nhập danh sách từ tiếng Anh (VD: resilient, abundant) nhé!');
         }
       } catch (err) {
         console.warn('AI Auto Import fallback:', err);
-        showToast('Không thể kết nối AI lúc này. Bạn có thể dùng "Nhập hàng loạt" bên cạnh nhé!');
+        if (rawText) {
+          const fallbackWords = await smartLookupWordsWithoutApiKey(rawText);
+          if (fallbackWords.length > 0) {
+            fallbackWords.forEach((item, idx) => {
+              appState.words.unshift({
+                id: 'ai_' + Date.now() + '_' + idx,
+                ...item,
+                topic,
+                folderId,
+                source,
+                mastered: false,
+                srs: { interval: 1, repetitions: 0, easeFactor: 2.5, dueDayOffset: appState.simDayOffset }
+              });
+            });
+            currentForestFolderId = folderId;
+            saveState();
+            renderDictionary();
+            closeAiImportModal();
+            document.getElementById('ai-imp-text').value = '';
+            gainExp(fallbackWords.length * 10, `Tra cứu tự động ${fallbackWords.length} từ`);
+            return;
+          }
+        }
+        showToast('⚠️ API Key chưa hợp lệ hoặc hết hạn mức. Bạn có thể xóa key cũ để dùng chế độ tra từ tự động!');
       } finally {
         if (loadingEl) loadingEl.classList.add('hidden');
         if (submitBtn) submitBtn.disabled = false;
@@ -4984,6 +5148,7 @@ User input text: "${rawText}"`;
       let nextHint = sc.suggestion;
 
       try {
+        if (!getGeminiApiKey()) throw new Error('NO_API_KEY');
         const recentHistory = s1v1Messages.slice(-6).map(m => `${m.sender === 'user' ? 'Student' : 'Lyra'}: ${m.en}`).join('\n');
         const aiPrompt = `You are Lyra, a warm, encouraging English tutor in a 1-on-1 live voice conversation.
 Scenario: ${sc.title}.
@@ -5623,18 +5788,22 @@ Respond naturally in 1-2 short, conversational English sentences and ask one eng
       const nameEl = document.getElementById('set-player-name');
       const goalEl = document.getElementById('set-daily-goal');
       const remEl = document.getElementById('set-reminder-time');
+      const keyEl = document.getElementById('set-gemini-api-key');
       if (nameEl) nameEl.value = appState.playerName || 'Starlight Explorer';
       if (goalEl) goalEl.value = appState.dailyGoal || 15;
       if (remEl) remEl.value = appState.reminderTime || '20:00';
+      if (keyEl) keyEl.value = getGeminiApiKey();
     }
 
     function saveWorkshopSettings() {
       const nameVal = (document.getElementById('set-player-name')?.value || '').trim();
       const goalVal = parseInt(document.getElementById('set-daily-goal')?.value || '15', 10);
       const remVal = document.getElementById('set-reminder-time')?.value || '20:00';
+      const keyVal = (document.getElementById('set-gemini-api-key')?.value || '').trim();
       if (nameVal) appState.playerName = nameVal;
       appState.dailyGoal = Math.max(5, goalVal);
       appState.reminderTime = remVal;
+      localStorage.setItem(GEMINI_API_KEY_STORAGE, keyVal);
       saveState();
       showToast('🪄 Đã lưu thiết lập trong Xưởng Chế Tác Ma Thuật!');
     }
